@@ -754,17 +754,24 @@ for (i = 0; i < coll.length; i++) {
 document.addEventListener("DOMContentLoaded", function() {
   var sections = document.querySelectorAll("section");
   sections.forEach(function(sec) {
-    if (sec.id === "header") return; // leave header expanded
-    // start collapsed
-    sec.classList.add("collapsed");
-
     var h2 = sec.querySelector("h2");
     if (!h2) return;
 
     // accessibility: make H2 focusable / keyboard-activatable
     h2.setAttribute("role", "button");
     h2.setAttribute("tabindex", "0");
-    h2.setAttribute("aria-expanded", "false");
+
+    // Decide initial collapsed state:
+    // - keep #header expanded
+    // - keep the section whose H2 text is "About" expanded
+    var title = h2.textContent ? h2.textContent.trim().toLowerCase() : "";
+    var isAbout = title === "about" || title.indexOf("about") === 0;
+    if (sec.id !== "header" && !isAbout) {
+      sec.classList.add("collapsed");
+    }
+
+    // set initial aria-expanded based on collapsed state
+    h2.setAttribute("aria-expanded", String(!sec.classList.contains("collapsed")));
 
     function setExpandedState() {
       var expanded = !sec.classList.contains("collapsed");
